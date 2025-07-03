@@ -7,13 +7,13 @@
   <title>My Alerts</title>
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌓</button>
+  
 
   <div class="container">
-    <h2>My Alerts</h2>
+    <h2>My Reminders</h2>
 
     <p style="text-align:center;">
-      <a class="button-link" href="/reminders/create">+ Add Reminder</a>
+      <a class="button-link" href="reminders/create">+ Add Reminder</a>
     </p>
 
     <?php if (empty($notes)): ?>
@@ -35,19 +35,11 @@
     <?php endif; ?>
 
     <div style="text-align:center; margin-top: 2rem;">
-      <a class="button-link" href="/home">🏠 Back to Dash</a>
+      <a class="button-link" href="/home"> Back to Home</a>
     </div>
   </div>
 
-  <script>
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    }
-
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark");
-    }
+  
   </script>
 </body>
 </html>
