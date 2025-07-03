@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/public/css/style.css">
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌓</button>
+  
 
   <div class="container">
     <h2>Create a Reminder</h2>
@@ -30,15 +30,7 @@
     <p><a href="/reminders">Back to list</a></p>
   </div>
 
-  <script>
-    function toggleTheme() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
-    }
-
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark");
-    }
+ 
   </script>
 </body>
 </html>
