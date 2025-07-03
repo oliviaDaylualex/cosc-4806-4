@@ -1,56 +1,55 @@
 <?php
 require_once __DIR__ . '/../database.php';
 
-class ReminderModel {
+class Reminder {
     private $db;
 
     public function __construct() {
         $this->db = db_connect();
     }
 
-    public function get_all_reminders(int $user_id): array {
+    /** Fetch all non-deleted reminders for a given user */
+    public function allForUser(int $userId): array {
         $stmt = $this->db->prepare(
-            "SELECT id, subject, completed, created_at
-             FROM reminders
-             WHERE user_id = :u AND deleted = 0
-             ORDER BY created_at DESC"
+            "SELECT id, subject, created_at, completed
+               FROM reminders
+              WHERE user_id = :uid
+                AND deleted = 0
+              ORDER BY created_at DESC"
         );
-        $stmt->execute(['u' => $user_id]);
+        $stmt->execute(['uid' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function find_reminder(int $id) {
+    /** Create a new reminder */
+    public function create(int $userId, string $subject): bool {
         $stmt = $this->db->prepare(
-            "SELECT id, user_id, subject, completed, created_at
-             FROM reminders
-             WHERE id = :id AND deleted = 0"
-        );
-        $stmt->execute(['id' => $id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function create_reminder(int $user_id, string $subject): bool {
-        $stmt = $this->db->prepare(
-            "INSERT INTO reminders (user_id, subject, completed, created_at)
-             VALUES (:user_id, :subject, 0, NOW())"
+            "INSERT INTO reminders (user_id, subject)
+             VALUES (:uid, :sub)"
         );
         return $stmt->execute([
-            'user_id' => $user_id,
-            'subject' => $subject
+            'uid' => $userId,
+            'sub' => $subject
         ]);
     }
 
-    public function mark_reminder_complete(int $id): bool {
+    /** Mark one as completed */
+    public function markCompleted(int $id): bool {
         $stmt = $this->db->prepare(
-            "UPDATE reminders SET completed = 1 WHERE id = :id AND deleted = 0"
-        );
-        return $stmt->execute(['id' => $id]);
-    }
-    public function delete_reminder(int $id): bool {
-        $stmt = $this->db->prepare(
-            "UPDATE reminders SET deleted = 1 WHERE id = :id"
+            "UPDATE reminders
+                SET completed = 1
+              WHERE id = :id"
         );
         return $stmt->execute(['id' => $id]);
     }
 
+    /** Soft-delete a reminder */
+    public function delete(int $id): bool {
+        $stmt = $this->db->prepare(
+            "UPDATE reminders
+                SET deleted = 1
+              WHERE id = :id"
+        );
+        return $stmt->execute(['id' => $id]);
+    }
 }

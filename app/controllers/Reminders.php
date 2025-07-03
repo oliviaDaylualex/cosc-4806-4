@@ -1,37 +1,32 @@
 <?php
-class Alerts extends Controller {
+class Reminders extends Controller {
     public function index(): void {
-        $uid   = $_SESSION['user_id'];
-        $m     = $this->model('Reminder');
-        $notes = $m->get_all_reminders($uid);
-        $this->view('reminders/index', ['notes' => $notes]);
+        if (empty($_SESSION['user_id'])) {
+            $this->redirect('/login');
+        }
+        $reminderM = $this->model('Reminder');
+        $data = ['list' => $reminderM->allForUser((int)$_SESSION['user_id'])];
+        $this->view('reminders/index', $data);
     }
 
     public function create(): void {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $subject = trim($_POST['subject'] ?? '');
             if ($subject !== '') {
-                $this->model('Reminder')
-                     ->create_reminder($_SESSION['user_id'], $subject);
-                $this->redirect('/reminders');
-                return;
+                $this->model('Reminder')->create((int)$_SESSION['user_id'], $subject);
             }
-            $this->view('reminders/create', [
-                'error'   => 'Subject required',
-                'subject' => $subject
-            ]);
-        } else {
-            $this->view('reminders/create');
+            $this->redirect('/reminders');
         }
-    }
-
-    public function delete(int $id): void {
-        $this->model('Reminder')->delete_reminder($id);
-        $this->redirect('/reminders');
+        $this->view('reminders/create');
     }
 
     public function complete(int $id): void {
-        $this->model('Reminder')->mark_reminder_complete($id);
+        $this->model('Reminder')->markCompleted($id);
+        $this->redirect('/reminders');
+    }
+
+    public function delete(int $id): void {
+        $this->model('Reminder')->delete($id);
         $this->redirect('/reminders');
     }
 }
