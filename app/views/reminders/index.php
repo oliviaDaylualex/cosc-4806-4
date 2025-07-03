@@ -7,20 +7,17 @@
   <title>My Alerts</title>
 </head>
 <body>
-  
-
   <div class="container">
     <h2>My Reminders</h2>
-
     <p style="text-align:center;">
-      <a class="button-link" href="reminders/create">+ Add Reminder</a>
+      <a class="button-link" href="/reminders/create">+ Add Reminder</a>
     </p>
 
-    <?php if (empty($notes)): ?>
+    <?php if (empty($list)): ?>
       <p style="text-align:center;">No reminders found.</p>
     <?php else: ?>
       <ul class="reminder-list">
-        <?php foreach ($notes as $note): ?>
+        <?php foreach ($list as $note): ?>
           <li>
             <?= htmlspecialchars($note['subject']) ?>
             <?php if (!$note['completed']): ?>
@@ -28,18 +25,16 @@
             <?php else: ?>
               <span class="completed">[Completed]</span>
             <?php endif; ?>
-            <a href="/reminders/delete/<?= $note['id'] ?>" onclick="return confirm('Delete this reminder?')">[Delete]</a>
+            <a href="/reminders/delete/<?= $note['id'] ?>"
+               onclick="return confirm('Delete this reminder?')">[Delete]</a>
           </li>
         <?php endforeach; ?>
       </ul>
     <?php endif; ?>
 
     <div style="text-align:center; margin-top: 2rem;">
-      <a class="button-link" href="/home"> Back to Home</a>
+      <a class="button-link" href="/home">Back to Home</a>
     </div>
   </div>
-
-  
-  </script>
 </body>
 </html>
