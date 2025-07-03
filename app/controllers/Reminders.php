@@ -1,32 +1,64 @@
 <?php
+
+
 class Reminders extends Controller {
-    public function index(): void {
-        if (empty($_SESSION['user_id'])) {
-            $this->redirect('/login');
+    public function __construct() {
+        parent::__construct();
+
+        
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
         }
-        $reminderM = $this->model('Reminder');
-        $data = ['list' => $reminderM->allForUser((int)$_SESSION['user_id'])];
-        $this->view('reminders/index', $data);
     }
 
+    
+    public function index(): void {
+        $this->requireLogin();
+
+        $userId    = $_SESSION['user_id'];
+        $reminderM = $this->model('Reminder');
+        $list      = $reminderM->allForUser($userId);
+
+        $this->view('reminders/index', ['list' => $list]);
+    }
+
+    
     public function create(): void {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $this->requireLogin();
+        if ($this->isPost()) {
             $subject = trim($_POST['subject'] ?? '');
             if ($subject !== '') {
-                $this->model('Reminder')->create((int)$_SESSION['user_id'], $subject);
+                $this->model('Reminder')
+                     ->create($_SESSION['user_id'], $subject);
             }
             $this->redirect('/reminders');
         }
         $this->view('reminders/create');
     }
 
+    
     public function complete(int $id): void {
+        $this->requireLogin();
         $this->model('Reminder')->markCompleted($id);
         $this->redirect('/reminders');
     }
 
+    
     public function delete(int $id): void {
+        $this->requireLogin();
         $this->model('Reminder')->delete($id);
         $this->redirect('/reminders');
+    }
+
+    
+    private function requireLogin(): void {
+        if (empty($_SESSION['user_id'])) {
+            $this->redirect('/login');
+        }
+    }
+
+    
+    private function isPost(): bool {
+        return $_SERVER['REQUEST_METHOD'] === 'POST';
     }
 }

@@ -2,13 +2,13 @@
 require_once __DIR__ . '/../database.php';
 
 class Reminder {
-    private $db;
+    private PDO $db;
 
     public function __construct() {
         $this->db = db_connect();
     }
 
-    /** Fetch all non-deleted reminders for a given user */
+    
     public function allForUser(int $userId): array {
         $stmt = $this->db->prepare(
             "SELECT id, subject, created_at, completed
@@ -21,19 +21,28 @@ class Reminder {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /** Create a new reminder */
+  
     public function create(int $userId, string $subject): bool {
-        $stmt = $this->db->prepare(
-            "INSERT INTO reminders (user_id, subject)
-             VALUES (:uid, :sub)"
-        );
-        return $stmt->execute([
-            'uid' => $userId,
-            'sub' => $subject
-        ]);
+        try {
+            $stmt = $this->db->prepare(
+                "INSERT INTO reminders
+                    (user_id, subject, created_at, completed, deleted)
+                 VALUES
+                    (:uid, :sub, NOW(), 0, 0)"
+            );
+            $stmt->execute([
+                'uid' => $userId,
+                'sub' => $subject
+            ]);
+            return true;
+        } catch (PDOException $e) {
+           
+            error_log('Reminder::create failed — ' . $e->getMessage());
+            return false;
+        }
     }
 
-    /** Mark one as completed */
+    
     public function markCompleted(int $id): bool {
         $stmt = $this->db->prepare(
             "UPDATE reminders
@@ -43,7 +52,7 @@ class Reminder {
         return $stmt->execute(['id' => $id]);
     }
 
-    /** Soft-delete a reminder */
+   
     public function delete(int $id): bool {
         $stmt = $this->db->prepare(
             "UPDATE reminders
